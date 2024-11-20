@@ -106,7 +106,6 @@ pos_features_test = pd.read_csv(r"divid_test_train\test_dataset_pos_2.csv")#
 neg_features_test = pd.read_csv(r"divid_test_train\test_dataset_neg_2.csv")
 X_test = np.vstack((pos_features_test, neg_features_test))
 y_test = np.concatenate((np.ones(pos_features_test.shape[0]), np.zeros(neg_features_test.shape[0])))
-# 转换数据为适合模型的格式
 x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1])  # (batch_size, 1, num_features)
 x_val = x_val.reshape(x_val.shape[0], 1, x_val.shape[1])
 X_test = X_test.reshape(X_test.shape[0], 1, X_test.shape[1])
