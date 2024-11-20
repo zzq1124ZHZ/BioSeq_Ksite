@@ -27,7 +27,6 @@ class CrossAttention(nn.Module):
         self.learned_positional_encoding = None  
 
     def forward(self, evo_local):
-        #########################################
         batch_size, seq_len, _ = evo_local.size() 
         if self.learned_positional_encoding is None:
             self.learned_positional_encoding = nn.Parameter(torch.randn(1, seq_len, self.q.out_features)).to(
@@ -95,7 +94,6 @@ class MyDataset(Dataset):
         return len(self.features)
     def __getitem__(self, idx):
         return self.features[idx], self.labels[idx]
-######################训练集##########################
 pos_feature_path = r"divid_test_train\train_dataset_pos_2.csv"#(9343, 2544)
 neg_feature_path = r"divid_test_train\train_dataset_neg_2.csv"#(10314, 2544)
 pos_features = pd.read_csv(pos_feature_path)
@@ -104,7 +102,6 @@ X = np.vstack((pos_features, neg_features))
 y = np.concatenate((np.ones(pos_features.shape[0]), np.zeros(neg_features.shape[0])))
 x_train, x_val, y_train, y_val = train_test_split(X, y, test_size=0.3, random_state=seed)
 print(x_train.shape)
-#########################测试集##########################
 pos_features_test = pd.read_csv(r"divid_test_train\test_dataset_pos_2.csv")#
 neg_features_test = pd.read_csv(r"divid_test_train\test_dataset_neg_2.csv")
 X_test = np.vstack((pos_features_test, neg_features_test))
