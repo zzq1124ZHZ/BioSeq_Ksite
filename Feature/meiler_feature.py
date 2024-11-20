@@ -31,30 +31,21 @@ def meiler_feature(fastas):
         for aa in sequence:
             code = code + meiler[aa]
         encodings.append(code)
-        # print(len(code))#330
     B = np.array(encodings)
     print(B.shape)
     return B
 import pandas as pd
 from Bio import SeqIO
-# 读取FASTA文件
-# fasta_file_path = r"positive.fasta"
 
-# 读取 FASTA 文件并转换格式
 sequences = []
 for record in SeqIO.parse(fasta_file_path, 'fasta'):
     data = record.seq
     data = re.sub('[^ARNDCQEGHILKMFPSTWYV]', '-', ''.join(data.upper()))
     sequences.append((record.id, str(data)))
-
 for sequence in sequences:
     sequence_name = sequence[0]
     sequence_data = sequence[1]
     sequence_length = len(sequence_data)
-    # print("Sequence Name:", sequence_name)
-    # print("Sequence Data:", sequence_data)
-    # print("Sequence Length:", sequence_length)
-    # print("-------------------")
     if sequence_length !=33:
         print("Found sequence with length 0!")
         print("Sequence Name:", sequence_name)
@@ -62,8 +53,8 @@ for sequence in sequences:
         print("-------------------")
 
 meiler_feature =meiler_feature(sequences)
-print(meiler_feature.shape)#(13187, 2400)
-# # 将结果保存到CSV文件
+print(meiler_feature.shape)
+
 csv_file_path = r'meiler_neg.csv'#41223
 np.savetxt(csv_file_path,meiler_feature, delimiter=',')
-print(f"CSV文件已保存到: {csv_file_path}")
+
