@@ -11,7 +11,6 @@ import pandas as pd
 import numpy as np
 #
 local_model_path = r"D:\Rostlab\prot_t5_xl_uniref50"
-# 使用 Hugging Face 模型库加载本地模型和分词器
 tokenizer = T5Tokenizer.from_pretrained(local_model_path, do_lower_case=False)
 model = T5EncoderModel.from_pretrained(local_model_path)
 # model = model.half()
@@ -26,7 +25,7 @@ def find_features_full_seq(sequences_Example):
     ids = tokenizer.batch_encode_plus(sequence, add_special_tokens=True, padding=True)
     input_ids = torch.tensor(ids['input_ids']).to(device)
     attention_mask = torch.tensor(ids['attention_mask']).to(device)
-    with torch.no_grad():#在其内部的代码块中关闭梯度计算。
+    with torch.no_grad():
         embedding = model(input_ids=input_ids,attention_mask=attention_mask)
     embedding = embedding.last_hidden_state.cpu()
 
@@ -46,13 +45,11 @@ for seq_record in tqdm(SeqIO.parse(input_fasta_file, "fasta")):
     # extract protT5 for full sequence and store in temporary dataframe
     pt5_all = find_features_full_seq(sequence)
     print(pt5_all.shape)#torch.Size([33, 1024])
-    #计算平均值
     per_protein1 = pt5_all.mean(dim=0)
     per_protein=per_protein1.numpy().reshape(1, -1)
     per_protein_list.append(per_protein)
 
 final_result = np.vstack(per_protein_list)
 print(final_result)
-# 调用函数并将嵌入表示存储到 CSV 文件
-output_file = r'pt5_pos_40.csv'  # CSV 文件路径
+output_file = r'pt5_pos_40.csv'  
 np.savetxt(output_file, final_result, delimiter=',')
