@@ -10,6 +10,13 @@ from sklearn import metrics
 import random
 from save_and_plot import save_and_plot
 
+seed=66
+def set_seed(seed_value=seed):
+    random.seed(seed_value) 
+    np.random.seed(seed_value) 
+    torch.manual_seed(seed_value) 
+    torch.cuda.manual_seed_all(seed_value)  
+set_seed(seed) 
 class CrossAttention(nn.Module):
     def __init__(self, input_dim, qk_dim, v_dim):
         super(CrossAttention, self).__init__()
