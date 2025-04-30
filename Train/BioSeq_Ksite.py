@@ -193,6 +193,7 @@ def test(model, test_loader, device):
     for key, value in metrics_dict.items():
         print(f'{key}: {value}')
     save_and_plot(arr_probs, arr_labels)
+    
     return metrics_dict['accuracy'], metrics_dict['MCC']
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = Seq2SeqModel(input_dim=1, d_model=14).to(device)
