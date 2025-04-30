@@ -34,9 +34,8 @@ def meiler_feature(fastas):
         for aa in sequence:
             code = code + meiler[aa]
         encodings.append(code)
-        # print(len(code))#330
+        # print(len(code))
     B = np.array(encodings)
-    print(B.shape)
     return B
 
 import pandas as pd
