@@ -33,10 +33,10 @@ class CrossAttention(nn.Module):
                 evo_local.device) 
         Q = self.q(evo_local)
         Q = Q + self.learned_positional_encoding  
-        k_v_features = self.cn6(evo_local.permute(0, 2, 1))  # Shape: (batch_size, qk_dim, seq_len)
-        k_v_features = self.pointwise_conv(k_v_features)  # Shape: (batch_size, qk_dim, seq_len)
-        K = k_v_features.permute(0, 2, 1)  # Shape: (batch_size, seq_len, qk_dim)
-        V = k_v_features.permute(0, 2, 1)  # Shape: (batch_size, seq_len, v_dim)
+        k_v_features = self.cn6(evo_local.permute(0, 2, 1))  
+        k_v_features = self.pointwise_conv(k_v_features)  
+        K = k_v_features.permute(0, 2, 1)  
+        V = k_v_features.permute(0, 2, 1) 
         atten_scores = torch.bmm(Q, K.permute(0, 2, 1)) * self._norm_fact 
         atten = F.softmax(atten_scores, dim=-1)
         output = torch.bmm(atten, V)
@@ -51,10 +51,10 @@ class CustomEncoder(nn.Module):
         self.cross_attention2 = CrossAttention(input_dim=2 * d_model, qk_dim=2 * d_model, v_dim=2 * d_model)
         self.gate_layer = nn.Linear(2 * d_model, 2 * d_model)
     def forward(self, src):
-        src_conv = src.permute(0, 2, 1)  # Shape: (batch_size, input_dim, seq_len)
-        src_conv = self.conv1(src_conv)  # Shape: (batch_size, d_model, seq_len)
-        src_conv = src_conv.permute(0, 2, 1)  # Shape: (batch_size, seq_len, d_model)
-        lstm_out, _ = self.bi_lstm(src_conv)  # Shape: (batch_size, seq_len, 2 * d_model)
+        src_conv = src.permute(0, 2, 1) 
+        src_conv = self.conv1(src_conv) 
+        src_conv = src_conv.permute(0, 2, 1)  
+        lstm_out, _ = self.bi_lstm(src_conv) 
         branch1_output = self.cross_attention1(lstm_out)
         branch2_output = self.cross_attention2(lstm_out)
         gate = torch.sigmoid(self.gate_layer(branch1_output + branch2_output))
@@ -134,8 +134,9 @@ def validate(model, val_loader, criterion, device):
 
 def train(model, train_loader, val_loader, device, optimizer, criterion, epochs=100):
     print(f"Using device: {device}")
+    best_val_loss = float('inf') 
+    best_model_path = 'best_model.pth'
 
-    early_stopping = EarlyStopping(patience=5, verbose=True, path='best_model.pth')
     for epoch in range(epochs):
         model.train()
         total_loss = 0
@@ -144,17 +145,23 @@ def train(model, train_loader, val_loader, device, optimizer, criterion, epochs=
             features = features.to(device)
             labels = labels.to(device)
             optimizer.zero_grad()
-            outputs = model(features) 
+            outputs = model(features)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
+
             if batch_idx % 10 == 0:
                 print(f"Epoch [{epoch+1}/{epochs}], Batch [{batch_idx+1}/{len(train_loader)}], Loss: {loss.item():.4f}")
+
         val_loss = validate(model, val_loader, criterion, device)
         print(f'Epoch {epoch+1}/{epochs}, Train Loss: {total_loss / len(train_loader):.4f}, Validation Loss: {val_loss:.4f}')
-    print('Finished Training')
 
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            torch.save(model.state_dict(), best_model_path)
+            print(f"Saved best model at epoch {epoch+1}, val_loss improved to {val_loss:.4f}")
+    print('Finished Training')
 
 def test(model, test_loader, device):
     model.load_state_dict(torch.load('best_model.pth'))
@@ -249,7 +256,7 @@ pos_weight_tensor = torch.tensor([pos_weight], dtype=torch.float32).to(device)
 
 #Beta and gamma do not need to sum to 1, they are simply used to adjust the relative contribution of each component during training.
 #You can try adjusting the parameters to see how they affect the results.
-criterion = CombinedLoss(alpha=0.55, pos_weight=pos_weight_tensor)
+criterion = CombinedLoss(alpha=0.55,,beta=0.85, gamma=0.45, pos_weight=pos_weight_tensor)
 train(model, train_loader, val_loader, device, optimizer, criterion)
 test_accuracy = test(model, test_loader, device)
 
