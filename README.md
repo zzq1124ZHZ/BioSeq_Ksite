@@ -8,3 +8,6 @@ torchvision :  0.13.1
 scikit-learn  :  1.5.2
 
 ProtT5-XL-UniRef50 model,it can be downloaded at: https://huggingface.co/Rostlab/prot_t5_xl_uniref50
+
+dataset file: Dataset folder
+feature data；Feature folder 
